@@ -1,0 +1,1 @@
+Simple ASCII fixture for quick parser tests.

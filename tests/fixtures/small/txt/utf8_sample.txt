@@ -1,0 +1,2 @@
+This is a UTF-8 fixture.
+Second line for aggregation tests.

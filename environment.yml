@@ -1,0 +1,21 @@
+name: doc-aggregator
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - setuptools
+  - tesseract
+  - libopencv
+  - py-opencv
+  - pip
+  - pip:
+      - pytesseract
+      - python-docx
+      - docxcompose
+      - PyMuPDF
+      - chardet
+      - langdetect
+      - tessdata.fast-eng
+      - pytest
+      - pytest-cov
+      - pytest-timeout

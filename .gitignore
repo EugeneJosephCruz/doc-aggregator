@@ -1,0 +1,41 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+*.egg
+dist/
+build/
+*.whl
+
+# Environment
+.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Project-specific
+.doc_aggregator_cache/
+_doc_aggregator_output*/
+
+# Debug logs
+.cursor/debug.log
+
+# Test artifacts
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Generated fixture binaries (regenerate with generate_corpus.py)
+tests/fixtures/small/docx/*.docx
+tests/fixtures/small/pdf/*.pdf
+tests/fixtures/small/images/*.png
+tests/fixtures/small/images/*.jpg
+tests/fixtures/small/images/*.tiff
+tests/fixtures/edge/oversized/large.txt
