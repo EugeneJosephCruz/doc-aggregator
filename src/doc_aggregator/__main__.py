@@ -15,7 +15,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="doc-aggregator")
     parser.add_argument("input_dir", nargs="?", default=".")
     parser.add_argument("-o", "--output-dir", default=None)
-    parser.add_argument("-n", "--output-name", default="aggregated.docx")
+    parser.add_argument("-n", "--output-name", default=None)
+    parser.add_argument("--pdf", action="store_true", help="Merge PDFs directly into a PDF")
 
     parser.add_argument("--resume", action="store_true")
     parser.add_argument("--dry-run", action="store_true")

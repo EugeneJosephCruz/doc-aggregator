@@ -20,6 +20,7 @@ SUPPORTED_EXTENSIONS = {
     ".tiff",
     ".tif",
 }
+PDF_ONLY_EXTENSIONS = {".pdf"}
 
 
 @dataclass(slots=True)
@@ -34,8 +35,9 @@ class ScannedFile:
     inode: int
 
 
-def is_supported_file(path: Path) -> bool:
-    return path.suffix.lower() in SUPPORTED_EXTENSIONS
+def is_supported_file(path: Path, extensions: set[str] | None = None) -> bool:
+    allowed = extensions or SUPPORTED_EXTENSIONS
+    return path.suffix.lower() in allowed
 
 
 def _is_excluded_dir(dir_name: str, config: AggregatorConfig) -> bool:
@@ -46,10 +48,15 @@ def scan_supported_files(
     input_dir: Path,
     config: AggregatorConfig,
     logger,
+    *,
+    extensions: set[str] | None = None,
+    exclude_paths: set[Path] | None = None,
 ) -> list[ScannedFile]:
     """Recursively scan input directory with depth/count/size guards."""
     root = input_dir.resolve()
     discovered: list[ScannedFile] = []
+    allowed_extensions = extensions or SUPPORTED_EXTENSIONS
+    excluded = {path.resolve() for path in (exclude_paths or set())}
 
     stack: list[tuple[Path, int]] = [(root, 0)]
     while stack:
@@ -78,7 +85,12 @@ def scan_supported_files(
 
                 if not entry.is_file(follow_symlinks=config.follow_symlinks):
                     continue
-                if not is_supported_file(entry_path):
+                if not is_supported_file(entry_path, allowed_extensions):
+                    continue
+
+                resolved_path = entry_path.resolve()
+                if resolved_path in excluded:
+                    logger.info("Skipping excluded file %s", resolved_path)
                     continue
 
                 stat = entry.stat(follow_symlinks=config.follow_symlinks)
@@ -95,7 +107,7 @@ def scan_supported_files(
                 rel = str(entry_path.relative_to(root))
                 discovered.append(
                     ScannedFile(
-                        path=entry_path.resolve(),
+                        path=resolved_path,
                         relative_path=rel,
                         display_name=entry_path.name,
                         size=stat.st_size,
