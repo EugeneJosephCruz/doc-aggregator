@@ -33,23 +33,28 @@ def create_docx(path: Path, heading: str, body: str) -> Path:
     return path
 
 
-def create_text_pdf(path: Path, text: str) -> Path:
+def create_pdf(path: Path, page_texts: list[str | None]) -> Path:
     path.parent.mkdir(parents=True, exist_ok=True)
     pdf = fitz.open()
-    page = pdf.new_page()
-    page.insert_text((72, 72), text)
+    for text in page_texts:
+        page = pdf.new_page()
+        if text:
+            page.insert_text((72, 72), text)
     pdf.save(path)
     pdf.close()
     return path
+
+
+def create_text_pdf(path: Path, text: str) -> Path:
+    return create_pdf(path, [text])
 
 
 def create_blank_pdf(path: Path) -> Path:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    pdf = fitz.open()
-    pdf.new_page()
-    pdf.save(path)
-    pdf.close()
-    return path
+    return create_pdf(path, [None])
+
+
+def create_multi_page_pdf(path: Path, page_texts: list[str]) -> Path:
+    return create_pdf(path, page_texts)
 
 
 def create_image(path: Path, text: str = "Fixture OCR") -> Path:

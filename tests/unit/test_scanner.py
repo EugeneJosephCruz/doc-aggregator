@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest
 
 from doc_aggregator.config import AggregatorConfig
-from doc_aggregator.utils.files import scan_supported_files
+from doc_aggregator.utils.files import PDF_ONLY_EXTENSIONS, scan_supported_files
 
 
 @pytest.mark.unit
@@ -37,3 +37,24 @@ def test_scanner_duplicate_name_disambiguation(tmp_path: Path) -> None:
 
     names = sorted([f.display_name for f in files])
     assert names == ["a/same.txt", "b/same.txt"]
+
+
+@pytest.mark.unit
+def test_scanner_supports_explicit_exclusions(tmp_path: Path) -> None:
+    keep = tmp_path / "keep.pdf"
+    skip = tmp_path / "skip.pdf"
+    keep.write_bytes(b"%PDF-1.7\n%\xe2\xe3\xcf\xd3\n")
+    skip.write_bytes(b"%PDF-1.7\n%\xe2\xe3\xcf\xd3\n")
+
+    logger = logging.getLogger("test_scanner_supports_explicit_exclusions")
+    config = AggregatorConfig()
+    files = scan_supported_files(
+        tmp_path,
+        config,
+        logger,
+        extensions=PDF_ONLY_EXTENSIONS,
+        exclude_paths={skip},
+    )
+
+    rel_paths = [f.relative_path for f in files]
+    assert rel_paths == ["keep.pdf"]
