@@ -31,6 +31,7 @@ class AggregatorConfig:
     default_ocr_lang: str = "eng"
 
     # Output
+    output_format: str = "docx"
     output_name: str = "aggregated.docx"
     strip_external_relationships: bool = True
     auto_open: bool = False
@@ -42,6 +43,8 @@ class AggregatorConfig:
     def from_cli(cls, args: argparse.Namespace) -> "AggregatorConfig":
         """Build config from parsed CLI args."""
         cfg = cls()
+        if getattr(args, "pdf", False):
+            cfg.output_format = "pdf"
 
         if getattr(args, "ocr_dpi", None):
             cfg.ocr_dpi = int(args.ocr_dpi)
@@ -49,6 +52,8 @@ class AggregatorConfig:
             cfg.max_file_size_mb = float(args.max_file_size_mb)
         if getattr(args, "output_name", None):
             cfg.output_name = str(args.output_name)
+        elif cfg.output_format == "pdf":
+            cfg.output_name = "aggregated.pdf"
         if getattr(args, "no_strip_external", False):
             cfg.strip_external_relationships = False
         if getattr(args, "verbose", False):
@@ -75,5 +80,9 @@ class AggregatorConfig:
             raise ValueError("ocr_page_timeout_sec must be > 0")
         if self.max_pdf_pages <= 0:
             raise ValueError("max_pdf_pages must be > 0")
-        if not self.output_name.lower().endswith(".docx"):
-            raise ValueError("output_name must end with .docx")
+        if self.output_format not in {"docx", "pdf"}:
+            raise ValueError("output_format must be either 'docx' or 'pdf'")
+        if self.output_format == "docx" and not self.output_name.lower().endswith(".docx"):
+            raise ValueError("output_name must end with .docx in docx mode")
+        if self.output_format == "pdf" and not self.output_name.lower().endswith(".pdf"):
+            raise ValueError("output_name must end with .pdf in pdf mode")

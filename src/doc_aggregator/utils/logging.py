@@ -11,11 +11,13 @@ def configure_logging(
     *,
     verbose: bool = False,
     log_file: Path | None = None,
-) -> tuple[logging.Logger, Path]:
+    enable_file_logging: bool = True,
+) -> tuple[logging.Logger, Path | None]:
     """Configure and return app logger and file path."""
     output_dir.mkdir(parents=True, exist_ok=True)
-    log_path = log_file or (output_dir / "processing.log")
-    log_path.parent.mkdir(parents=True, exist_ok=True)
+    log_path = (log_file or (output_dir / "processing.log")) if enable_file_logging else None
+    if log_path is not None:
+        log_path.parent.mkdir(parents=True, exist_ok=True)
 
     logger = logging.getLogger("doc_aggregator")
     logger.setLevel(logging.DEBUG if verbose else logging.INFO)
@@ -32,9 +34,10 @@ def configure_logging(
     console.setFormatter(formatter)
     logger.addHandler(console)
 
-    file_handler = logging.FileHandler(log_path, encoding="utf-8")
-    file_handler.setLevel(logging.DEBUG)
-    file_handler.setFormatter(formatter)
-    logger.addHandler(file_handler)
+    if log_path is not None:
+        file_handler = logging.FileHandler(log_path, encoding="utf-8")
+        file_handler.setLevel(logging.DEBUG)
+        file_handler.setFormatter(formatter)
+        logger.addHandler(file_handler)
 
     return logger, log_path
