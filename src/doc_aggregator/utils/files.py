@@ -40,8 +40,14 @@ def is_supported_file(path: Path, extensions: set[str] | None = None) -> bool:
     return path.suffix.lower() in allowed
 
 
+ALWAYS_EXCLUDED_DIRS = {".cache"}
+
+
 def _is_excluded_dir(dir_name: str, config: AggregatorConfig) -> bool:
-    return fnmatch.fnmatch(dir_name, config.excluded_dir_pattern)
+    return (
+        dir_name in ALWAYS_EXCLUDED_DIRS
+        or fnmatch.fnmatch(dir_name, config.excluded_dir_pattern)
+    )
 
 
 def scan_supported_files(

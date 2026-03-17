@@ -2,11 +2,26 @@
 
 from __future__ import annotations
 
+import shutil
+import sys
 from functools import lru_cache
+from pathlib import Path
 
 import pytesseract
 
 from doc_aggregator.config import AggregatorConfig
+
+
+def _resolve_tesseract_cmd() -> None:
+    """Ensure pytesseract can find the tesseract binary even without conda activate."""
+    if shutil.which("tesseract"):
+        return
+    env_bin = Path(sys.executable).resolve().parent / "tesseract"
+    if env_bin.is_file():
+        pytesseract.pytesseract.tesseract_cmd = str(env_bin)
+
+
+_resolve_tesseract_cmd()
 
 
 @lru_cache(maxsize=1)
